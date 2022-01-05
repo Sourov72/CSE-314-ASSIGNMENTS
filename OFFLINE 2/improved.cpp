@@ -68,12 +68,13 @@ void * create_passenger(void * arg){
 
 
     std::default_random_engine generator;
-    std::poisson_distribution<int> distribution(3);
+    std::poisson_distribution<int> distribution(60 / (intptr_t) arg);
     string s;
 
 
     while(1){
         
+        if(pid > 8) break;
         passenger p;
         p.setId(pid);
         pid++;
@@ -584,6 +585,7 @@ int main(void)
     srand(time(0));
     // show_passenger();
 
+    int no_of_person = 20;
 
     ifstream inputfile;
     fstream outputfile;
@@ -596,7 +598,7 @@ int main(void)
         return 0;
     }
 
-    // freopen("output.txt", "w", stdout);
+    freopen("output.txt", "w", stdout);
 
     
     inputfile >> M;
@@ -646,13 +648,10 @@ int main(void)
         
 
         // rc = pthread_create(&threads[t], NULL, checkinKiosk, (void*) &temp);
-        rc = pthread_create(&kioskthreads[t], NULL, checkinKiosk, (void*) (intptr_t) t);
+        pthread_create(&kioskthreads[t], NULL, checkinKiosk, (void*) (intptr_t) t);
         cout << "In main: creating different kiosk thread : " <<  t << endl;
 
-        if (rc){
-                printf("ERROR; return code from pthread_create() is %d\n", rc);
-                exit(-1);
-        }
+       
 
         t++;
         
@@ -664,13 +663,8 @@ int main(void)
 
         // rc = pthread_create(&threads[t], NULL, checkinKiosk, (void*) &temp);
         // no of belts here
-        rc = pthread_create(&belthread[t], NULL, securityCheck , (void*) (intptr_t) t);
+        pthread_create(&belthread[t], NULL, securityCheck , (void*) (intptr_t) t);
         cout << "In main: creating different security thread : " <<  t << endl;
-
-        if (rc){
-                printf("ERROR; return code from pthread_create() is %d\n", rc);
-                exit(-1);
-        }
 
         t++;
     }
@@ -687,13 +681,8 @@ int main(void)
     cout << "In main: creating boarding thread " << endl;
 
 
-    rc = pthread_create(&pasthread, NULL, create_passenger, NULL);
+    pthread_create(&pasthread, NULL, create_passenger, (void*) (intptr_t) no_of_person);
     cout << "In main: creating different passenger thread " << endl;
-
-    if (rc){
-            printf("ERROR; return code from pthread_create() is %d\n", rc);
-            exit(-1);
-    }
 
 	while(1);
 	return 0;
